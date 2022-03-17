@@ -59,13 +59,17 @@ def verif_sens_QC(mat):
             if coin[i][j] != mat[i][j]:
                 mat = rotation(2, mat)
                 return mat
-            if coin[i][j - 1] != mat[i][j - 1]:
+            if coin[i][-(j + 1)] != mat[i][-(j + 1)]:
                 mat = rotation(0, mat)
                 return mat
-            if coin[i - 1][j] != mat[i - 1][j]:
+            if coin[-(i + 1)][j] != mat[-(i - 1)][j]:
                 mat = rotation(1, mat)
                 return mat
     return mat
+
+
+def verif_():
+    pass
 
 
 # variables
