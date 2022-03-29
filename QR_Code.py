@@ -114,12 +114,12 @@ def correction_hamming(liste):
 
 
 # variables
-matrice = loading("Exemples/qr_code_ssfiltre_ascii_rotation.png")
+matrice = loading("Exemples/qr_code_ssfiltre_ascii.png")
 # matrice = rotation(2, matrice)
 # print(*matrice, sep='\n', end="\n\n")
 # print(verif_ligne(matrice))
-# matrice = verif_sens_QC(matrice)
-# print(*matrice, sep='\n')
+matrice = verif_sens_QC(matrice)
+print(*matrice, sep='\n')
 # print(verif_ligne(matrice))
 
 msg = list(map(int, list("1100101")))
