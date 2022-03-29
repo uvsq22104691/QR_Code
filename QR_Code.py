@@ -45,14 +45,14 @@ def coin_QC():
 def rotation(sens, mat):
     """ 0 = droite 1 = gauche 2 = deux fois droite"""
     if sens == 0:
-        return [[mat[-(i + 1)][j] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
         # tourne la matrice dans le sens horaire une fois
+        return [[mat[-(i + 1)][j] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
     elif sens == 1:
-        return [[mat[i][-(j + 1)] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
         # tourne la matrice dans le sens anti-horaire une fois
+        return [[mat[i][-(j + 1)] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
 
+    # tourne la matrice dans le sens horaire deux fois (ou symetrie horizontal et vertical)
     return [[mat[-(i + 1)][-(j + 1)] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
-        # tourne la matrice dans le sens horaire deux fois (ou symetrie horizontal et vertical)
 
 
 def verif_sens_QC(mat):
@@ -75,18 +75,18 @@ def verif_sens_QC(mat):
 def verif_ligne(mat):
     verif = True
     for i in range(11):
-        if i%2 == 0:
-            if mat[6][7+i]%2 == 0:
+        if i % 2 == 0:
+            if mat[6][7 + i] % 2 == 0:
                 verif = False
-            if mat[7+i][6]%2 == 0:
+            if mat[7 + i][6] % 2 == 0:
                 verif = False
         else:
-            if mat[6][7+i]%2 != 0:
+            if mat[6][7 + i] % 2 != 0:
                 verif = False
-            if mat[7+i][6]%2 != 0:
+            if mat[7 + i][6] % 2 != 0:
                 verif = False
-    
-    return verif    
+
+    return verif
 
 
 def correction_hamming(liste):
