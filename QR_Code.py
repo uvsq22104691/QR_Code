@@ -91,31 +91,36 @@ def verif_ligne(mat):
 
 def correction_hamming(liste):
     m1, m2, m3, m4, c1, c2, c3 = liste
-    p_err = []
-    if c1 == (m1 + m2 + m4) % 2:
-        p_err.append(3)
-    if c2 == (m1 + m3 + m4) % 2:
-        p_err.append(2)
-    if c3 == (m2 + m3 + m4) % 2:
-        p_err.append(1)
+    err = {
+        1: 4,
+        2: 5,
+        3: 0,
+        4: 6,
+        5: 1,
+        6: 2,
+        7: 3,
+    }
+    p_err = 0
+    if c1 != (m1 + m2 + m4) % 2:
+        p_err += 1
+    if c2 != (m1 + m3 + m4) % 2:
+        p_err += 2
+    if c3 != (m2 + m3 + m4) % 2:
+        p_err += 4
 
-    if len(p_err) == 0:
-        return liste
-    elif len(p_err) == 1:
-        pass
-    elif len(p_err) == 2:
-        pass
-    elif len(p_err) > 2:
-        return False
-
-    print(p_err)
+    if p_err != 0:
+        liste[err[p_err]] = 0 if liste[err[p_err]] == 1 else 1
+    return liste[:4]
 
 
 # variables
 matrice = loading("Exemples/qr_code_ssfiltre_ascii_rotation.png")
-matrice = rotation(2, matrice)
-print(*matrice, sep='\n', end="\n\n")
-print(verif_ligne(matrice))
-matrice = verif_sens_QC(matrice)
-print(*matrice, sep='\n')
-print(verif_ligne(matrice))
+# matrice = rotation(2, matrice)
+# print(*matrice, sep='\n', end="\n\n")
+# print(verif_ligne(matrice))
+# matrice = verif_sens_QC(matrice)
+# print(*matrice, sep='\n')
+# print(verif_ligne(matrice))
+
+msg = list(map(int, list("1100101")))
+print(correction_hamming(msg))
