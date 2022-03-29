@@ -108,19 +108,44 @@ def correction_hamming(liste):
     if c3 != (m2 + m3 + m4) % 2:
         p_err += 4
 
-    if p_err != 0:
-        liste[err[p_err]] = 0 if liste[err[p_err]] == 1 else 1
+    # if p_err != 0:
+    #     liste[err[p_err]] = 0 if liste[err[p_err]] == 1 else 1
     return liste[:4]
 
 
+def lire_qr_code(mat):
+    liste = []
+    for i in range(0, 16, 2):
+        m = mat[::-1][i:i + 2][::-1]
+        m = [mat[-14:] for mat in m]
+
+        if i % 4 == 0:
+            m1 = [m[i % 2][-((i - 1) // 2 + 1)] for i in range(1, 15)]
+            m2 = [m[i % 2][-((i - 1) // 2 + 8)] for i in range(1, 15)]
+        else:
+            m1 = [m[i % 2][-((i - 1) // 2 + 8)] for i in range(1, 15)]
+            m2 = [m[i % 2][-((i - 1) // 2 + 1)] for i in range(1, 15)]
+
+        liste.append(m1)
+        liste.append(m2)
+    return liste
+
+
 # variables
-matrice = loading("Exemples/qr_code_ssfiltre_ascii_rotation.png")
+matrice = loading("Exemples/qr_code_ssfiltre_ascii.png")
 # matrice = rotation(2, matrice)
+
 # print(*matrice, sep='\n', end="\n\n")
 # print(verif_ligne(matrice))
-# matrice = verif_sens_QC(matrice)
+matrice = verif_sens_QC(matrice)
 # print(*matrice, sep='\n')
 # print(verif_ligne(matrice))
 
-msg = list(map(int, list("1100101")))
-print(correction_hamming(msg))
+# msg = list(map(int, list("1100101")))
+# print(correction_hamming(msg))
+
+l1 = lire_qr_code(matrice)
+for bloc in l1:
+    tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[1:]
+    tmp = int(tmp, 2)
+    print(f"{chr(tmp)} - {tmp}")
