@@ -1,7 +1,10 @@
 from PIL import Image
+import tkinter as tk
+import tkinter.filedialog as fd
+import os
 
 
-# Fonctions
+# Fonction
 def nbrLig(mat):
     '''TO DO'''
     return len(mat)
@@ -147,7 +150,7 @@ def lire_type_donnee(mat):
 
 def interpreter_ascii(mat):
     '''TO DO'''
-    for bloc in [liste for liste in l1 if sum(liste) != 14]:
+    for bloc in [liste for liste in mat if sum(liste) != 14]:
         tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
         tmp = int(tmp, 2)
         print(chr(tmp), end="")
@@ -155,32 +158,68 @@ def interpreter_ascii(mat):
 
 def interpreter_num(mat):
     '''TO DO'''
-    for bloc in [liste for liste in l1 if sum(liste) != 14]:
+    for bloc in [liste for liste in mat if sum(liste) != 14]:
         tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
         print(hex(int(tmp[:4], 2))[2:3], hex(int(tmp[4:], 2))[2:3], sep="", end=" ")
 
 
+def interpreter(mat, data):
+    if lire_type_donnee(mat) == 1:
+        interpreter_ascii(data)
+    else:
+        interpreter_num(data)
+
+
 def lire_type_filtre(mat):
     '''TO DO'''
-    filtre = [mat[23][8], mat[23][9]]
-    if sum(filtre) == 0:
-        return 0
-    elif sum(filtre) == 2:
-        return 3
-    elif filtre[0] == 0:
-        return 1
-    else:
-        return 2
+    filtre = ''.join([str(mat[22][8]), str(mat[23][8])])
+    return int(filtre, 2)
 
 
 def applique_filtre(matrice):
     '''TO DO'''
-    pass
+    filtre = lire_type_filtre(matrice)
+    if filtre == 0:
+        return matrice
+    elif filtre == 1:
+        for y in range(-16, 0, 1):
+            for x in range(-14, 0, 1):
+                matrice[y][x] = matrice[y][x] ^ (y + x) % 2
+        return matrice
+    elif filtre == 2:
+        for y in range(-16, 0, 1):
+            for x in range(-14, 0, 1):
+                matrice[y][x] = matrice[y][x] ^ y % 2
+        return matrice
+    elif filtre == 3:
+        for y in range(-16, 0, 1):
+            for x in range(-14, 0, 1):
+                matrice[y][x] = matrice[y][x] ^ x % 2
+        return matrice
 
 
-# variables
-matrice = loading("Exemples/qr_code_ssfiltre_num.png")
-matrice = verif_sens_QC(matrice)
+def ouvrir_fichier():
+    f = fd.askopenfile(
+        initialdir=os.getcwd() + "/Exemples/",
+        title="charger un QR Code",
+        filetypes=(("fichier PNG", "*.png"),)
+    )
+    if f is None:
+        return ""
+    return f.name
 
-l1 = lire_qr_code(matrice)
-interpreter_num(l1)
+
+def main():
+    root = tk.Tk()
+    root.title("vives les damiers :wink:")
+    file = ""
+    while file == "":
+        file = ouvrir_fichier()
+    mat = loading(file)
+    mat = verif_sens_QC(mat)
+    mat = applique_filtre(mat)
+    data = lire_qr_code(mat)
+    interpreter(mat, data)
+
+
+main()
