@@ -162,6 +162,7 @@ def interpreter_num(mat):
 
 def lire_type_filtre(mat):
     '''TO DO'''
+    filtre = [mat[23][8], mat[23][9]]
     pass
 
 
