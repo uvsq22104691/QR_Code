@@ -3,10 +3,12 @@ from PIL import Image
 
 # Fonctions
 def nbrLig(mat):
+    '''TO DO'''
     return len(mat)
 
 
 def nbrCol(mat):
+    ''' TO DO'''
     return len(mat[0])
 
 
@@ -43,7 +45,10 @@ def coin_QC():
 
 
 def rotation(sens, mat):
-    """ 0 = droite 1 = gauche 2 = deux fois droite"""
+    """ 0 = droite
+        1 = gauche
+        2 = deux fois à droite
+    """
     if sens == 0:
         # tourne la matrice dans le sens horaire une fois
         return [[mat[-(i + 1)][j] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
@@ -73,6 +78,7 @@ def verif_sens_QC(mat):
 
 
 def verif_ligne(mat):
+    '''TO DO'''
     verif = True
     for i in range(11):
         if i % 2 == 0:
@@ -90,6 +96,7 @@ def verif_ligne(mat):
 
 
 def correction_hamming(liste):
+    '''TO DO'''
     m1, m2, m3, m4, c1, c2, c3 = liste
     err = {
         1: 4,
