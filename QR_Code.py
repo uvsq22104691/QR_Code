@@ -153,6 +153,16 @@ def interpreter_num(mat):
         print(hex(int(tmp[:4], 2))[2:3], hex(int(tmp[4:], 2))[2:3], sep="", end=" ")
 
 
+def lire_type_filtre(mat):
+    '''TO DO'''
+    pass
+
+
+def applique_filtre(matrice):
+    '''TO DO'''
+    pass
+
+
 # variables
 matrice = loading("Exemples/qr_code_ssfiltre_num.png")
 matrice = verif_sens_QC(matrice)
