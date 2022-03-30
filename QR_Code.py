@@ -163,7 +163,14 @@ def interpreter_num(mat):
 def lire_type_filtre(mat):
     '''TO DO'''
     filtre = [mat[23][8], mat[23][9]]
-    pass
+    if sum(filtre) == 0:
+        return 0
+    elif sum(filtre) == 2:
+        return 3
+    elif filtre[0] == 0:
+        return 1
+    else:
+        return 2
 
 
 def applique_filtre(matrice):
