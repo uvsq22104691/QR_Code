@@ -108,12 +108,13 @@ def correction_hamming(liste):
     if c3 != (m2 + m3 + m4) % 2:
         p_err += 4
 
-    # if p_err != 0:
-    #     liste[err[p_err]] = 0 if liste[err[p_err]] == 1 else 1
+    if p_err != 0:
+        liste[err[p_err]] = 0 if liste[err[p_err]] == 1 else 1
     return liste[:4]
 
 
 def lire_qr_code(mat):
+    '''TO DO'''
     liste = []
     for i in range(0, 16, 2):
         m = mat[::-1][i:i + 2][::-1]
@@ -123,29 +124,38 @@ def lire_qr_code(mat):
             m1 = [m[i % 2][-((i - 1) // 2 + 1)] for i in range(1, 15)]
             m2 = [m[i % 2][-((i - 1) // 2 + 8)] for i in range(1, 15)]
         else:
-            m1 = [m[i % 2][-((i - 1) // 2 + 8)] for i in range(1, 15)]
-            m2 = [m[i % 2][-((i - 1) // 2 + 1)] for i in range(1, 15)]
+            m1 = [m[(i + 1) % 2][i // 2] for i in range(0, 14)]
+            m2 = [m[(i + 1) % 2][i // 2 + 7] for i in range(0, 14)]
+            pass
 
         liste.append(m1)
         liste.append(m2)
     return liste
 
 
+def lire_type_donnee(mat):
+    '''TO DO'''
+    return mat[24][8]
+
+
+def interpreter_ascii(mat):
+    '''TO DO'''
+    for bloc in [liste for liste in l1 if sum(liste) != 14]:
+        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
+        tmp = int(tmp, 2)
+        print(chr(tmp), end="")
+
+
+def interpreter_num(mat):
+    '''TO DO'''
+    for bloc in [liste for liste in l1 if sum(liste) != 14]:
+        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
+        print(hex(int(tmp[:4], 2))[2:3], hex(int(tmp[4:], 2))[2:3], sep="", end=" ")
+
+
 # variables
-matrice = loading("Exemples/qr_code_ssfiltre_ascii.png")
-# matrice = rotation(2, matrice)
-
-# print(*matrice, sep='\n', end="\n\n")
-# print(verif_ligne(matrice))
+matrice = loading("Exemples/qr_code_ssfiltre_num.png")
 matrice = verif_sens_QC(matrice)
-# print(*matrice, sep='\n')
-# print(verif_ligne(matrice))
-
-# msg = list(map(int, list("1100101")))
-# print(correction_hamming(msg))
 
 l1 = lire_qr_code(matrice)
-for bloc in l1:
-    tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[1:]
-    tmp = int(tmp, 2)
-    print(f"{chr(tmp)} - {tmp}")
+interpreter_num(l1)
