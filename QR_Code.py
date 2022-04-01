@@ -108,7 +108,7 @@ def verif_ligne(mat):
 def correction_hamming(liste):
     '''TO DO'''
     m1, m2, m3, m4, c1, c2, c3 = liste
-    err = {
+    d_err = {
         1: 4,
         2: 5,
         3: 0,
@@ -117,16 +117,13 @@ def correction_hamming(liste):
         6: 2,
         7: 3,
     }
-    p_err = 0
-    if c1 != (m1 + m2 + m4) % 2:
-        p_err += 1
-    if c2 != (m1 + m3 + m4) % 2:
-        p_err += 2
-    if c3 != (m2 + m3 + m4) % 2:
-        p_err += 4
+    err = 0
+    err += 1 if int(c1 != (m1 + m2 + m4) % 2) else 0
+    err += 2 if int(c2 != (m1 + m3 + m4) % 2) else 0
+    err += 4 if int(c3 != (m2 + m3 + m4) % 2) else 0
 
-    if p_err != 0:
-        liste[err[p_err]] = 0 if liste[err[p_err]] == 1 else 1
+    if err != 0:
+        liste[d_err[err]] = 0 if liste[d_err[err]] == 1 else 1
     return liste[:4]
 
 
@@ -262,32 +259,53 @@ def del_fen_QR():
     del fen_QR
 
 
-def apercu(fen, dataType, filtre, message):
+def creer_QR(save):
+    global L_image, img, message, filtre, dataType
+    dType = dataType.get()
+    f = filtre.get()
     data = list(message.get())
     data = [bin(ord(d))[2:] for d in data]
     data = ["0" * (8 - len(d)) + d if len(d) != 8 else d for d in data]
-    data = [[to_hamming(d[:4]) + to_hamming(d[4:])] for d in data]
+    data = [d[::-1] for d in data]
+    data = [to_hamming(d[:4]) + to_hamming(d[4:]) for d in data]
+
     n = len(data)
-    for i in range(0, n, 2):
-        m = [[1] * 14 for i in range(16)]
+    m = [[1] * 14 for _ in range(16)]
 
-        if i % 4 == 0:
-            for j in range(1, 15):
-                m[i % 2][-((i - 1) // 2 + 1)] = 0
-                m[i % 2][-((i - 1) // 2 + 8)] = 0
+    for i in range(1, 2 * ((n + 1) // 2) + 1, 2):
+        if i % 4 == 1:
+            for j in range(14):
+                m[-(i + j % 2)][-(j // 2 + 1)] = data[i - 1][j]
+                if i < len(data):
+                    m[-(i + j % 2)][-(j // 2 + 8)] = data[i][j]
         else:
-            for j in range(1, 15):
-                m[(i + 1) % 2][i // 2] = 0
-                m[(i + 1) % 2][i // 2 + 7] = 0
-    pass
+            for j in range(14):
+                m[-(i + j % 2)][j // 2] = data[i - 1][j]
+                if i < len(data):
+                    m[-(i + j % 2)][j // 2 + 7] = data[i][j]
 
+    m = applique_filtre(m, f)
 
-def creer_QR(fen, dataType, filtre, message):
-    pass
+    mat = loading('Exemples/frame.png')
+    for i in range(1, n % 2 + n + 1):
+        for j in range(1, 15):
+            mat[-i][-j] = m[-i][-j]
+    mat[22][8] = 0 if f in [0, 1] else 1
+    mat[23][8] = 0 if f in [0, 2] else 1
+    mat[24][8] = dType
+    mat = [elem if elem == 0 else 255 for line in mat for elem in line]
+
+    toLoad = Image.new("1", (25, 25))
+    toLoad.putdata(mat)
+    if save:
+        toLoad.save("test1.png")
+    toLoad = toLoad.resize((300, 300))
+    img = ImageTk.PhotoImage(toLoad)
+    L_image['image'] = img
 
 
 def fen_creer_QR():
-    global root, fen_QR
+    global root, fen_QR, message, filtre, dataType
     if "fen_QR" in globals():
         fen_QR.focus_force()
         return
@@ -313,8 +331,8 @@ def fen_creer_QR():
     L_message = tk.Label(fen_QR, text="Meesage: ")
     E_message = tk.Entry(fen_QR, textvariable=message)
 
-    B_apercu = tk.Button(fen_QR, text="Aperçu du QR Code", command=lambda: apercu(fen_QR, dataType, filtre, message))
-    B_creer = tk.Button(fen_QR, text="Créer le QR Code", command=lambda: creer_QR(fen_QR, dataType, filtre, message))
+    B_apercu = tk.Button(fen_QR, text="Aperçu du QR Code", command=lambda: creer_QR(False))
+    B_creer = tk.Button(fen_QR, text="Créer le QR Code", command=lambda: creer_QR(True))
 
     L_image = tk.Label(fen_QR)
 
@@ -323,8 +341,8 @@ def fen_creer_QR():
 
     R_pas_filtre.grid(row=1, column=0)
     R_damier.grid(row=1, column=1)
-    R_ligneV.grid(row=1, column=2)
-    R_ligneH.grid(row=1, column=3)
+    R_ligneH.grid(row=1, column=2)
+    R_ligneV.grid(row=1, column=3)
 
     L_message.grid(row=2, column=0, columnspan=2)
     E_message.grid(row=2, column=2, columnspan=2)
