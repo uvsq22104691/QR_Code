@@ -127,7 +127,7 @@ def extraire_donnee(mat):
 
 def lire_nb_nbloc(mat):
     '''Retourne le nombre de blocs de données dans le QR Code'''
-    return int("".join([str(mat[i][0]) for i in range(12, 17)]), 2)
+    return int("".join([str(mat[i][0]) for i in range(13, 18)]), 2)
 
 
 def lire_donnee(mat, nbBloc=16):
@@ -160,7 +160,7 @@ def interpreter_ascii(data):
     global L_info
     s = ""
     for bloc in [liste for liste in data]:
-        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
+        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))
         tmp = int(tmp, 2)
         s += chr(tmp)
     L_info['text'] = L_info['text'] + f"\nMessage:\t\t{s}"
@@ -171,8 +171,8 @@ def interpreter_num(data):
     global L_info
     s = ""
     for bloc in [liste for liste in data]:
-        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
-        s += hex(int(tmp[:4], 2))[2:3] + hex(int(tmp[4:], 2))[2:3] + " "
+        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))
+        s += hex(int(tmp, 2))[2:].upper() + " "
     s = s[:-1]
     L_info['text'] = L_info['text'] + f"\nMessage:\t\t{s}"
 
