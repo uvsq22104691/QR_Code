@@ -54,18 +54,12 @@ def coin_QC():
 
 
 def rotation(sens, mat):
-    """ 0 = droite
-        1 = gauche
-        2 = deux fois à droite
-    """
+    """ Retourne la matrice tournée dans le sens (0: horaire, 1: anti-horaire, 2: 180°)"""
     if sens == 0:
-        # tourne la matrice dans le sens horaire une fois
         return [[mat[-(i + 1)][j] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
     elif sens == 1:
-        # tourne la matrice dans le sens anti-horaire une fois
         return [[mat[i][-(j + 1)] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
 
-    # tourne la matrice dans le sens horaire deux fois (ou symetrie horizontal et vertical)
     return [[mat[-(i + 1)][-(j + 1)] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
 
 
@@ -87,7 +81,7 @@ def verif_sens_QC(mat):
 
 
 def verif_ligne(mat):
-    '''TO DO'''
+    '''Vérifie que les lignes horizontales et verticales reliant les coins du QR Code sont bien présentes'''
     verif = True
     for i in range(11):
         if i % 2 == 0:
@@ -131,24 +125,28 @@ def extraire_donnee(mat):
     return [ligne[-14:] for ligne in mat[-16:]]
 
 
-def lire_donnee(mat):
+def lire_nb_nbloc(mat):
+    '''Retourne le nombre de blocs de données dans le QR Code'''
+    return int("".join([str(mat[i][0]) for i in range(12, 17)]), 2)
+
+
+def lire_donnee(mat, nbBloc=16):
     '''retourne la liste de liste des blocs de données de 14 bits'''
-    global L_message
     liste = []
-    for i in range(0, 16, 2):
+    for i in range(0, nbBloc, 2):
         m = mat[::-1][i:i + 2][::-1]
         m = [mat[-14:] for mat in m]
 
         if i % 4 == 0:
-            m1 = [m[i % 2][-((i - 1) // 2 + 1)] for i in range(1, 15)]
-            m2 = [m[i % 2][-((i - 1) // 2 + 8)] for i in range(1, 15)]
+            m1 = [m[j % 2][-((j - 1) // 2 + 1)] for j in range(1, 15)]
+            m2 = [m[j % 2][-((j - 1) // 2 + 8)] for j in range(1, 15)]
         else:
-            m1 = [m[(i + 1) % 2][i // 2] for i in range(0, 14)]
-            m2 = [m[(i + 1) % 2][i // 2 + 7] for i in range(0, 14)]
+            m1 = [m[(j + 1) % 2][j // 2] for j in range(0, 14)]
+            m2 = [m[(j + 1) % 2][j // 2 + 7] for j in range(0, 14)]
 
         liste.append(m1)
         liste.append(m2)
-    return liste
+    return liste[:nbBloc]
 
 
 def lire_type_donnee(mat):
@@ -161,7 +159,7 @@ def interpreter_ascii(data):
     '''Affiche le message interprété en ASCII'''
     global L_info
     s = ""
-    for bloc in [liste for liste in data if sum(liste) != 14]:
+    for bloc in [liste for liste in data]:
         tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
         tmp = int(tmp, 2)
         s += chr(tmp)
@@ -172,7 +170,7 @@ def interpreter_num(data):
     '''Affiche le message interprété en hexadécimal'''
     global L_info
     s = ""
-    for bloc in [liste for liste in data if sum(liste) != 14]:
+    for bloc in [liste for liste in data]:
         tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))[::-1]
         s += hex(int(tmp[:4], 2))[2:3] + hex(int(tmp[4:], 2))[2:3] + " "
     s = s[:-1]
@@ -232,18 +230,25 @@ def ouvrir_QR():
     if f is None:
         return
 
-    mat = loading(f.name)
+    filename = f.name
+    f.close()
+
+    mat = loading(filename)
     mat = verif_sens_QC(mat)
 
     data = extraire_donnee(mat)
     filtre = lire_type_filtre(mat)
     dataType = lire_type_donnee(mat)
+    nbBloc = lire_nb_nbloc(mat)
 
     data = applique_filtre(data, filtre)
-    data = lire_donnee(data)
+    data = lire_donnee(data, nbBloc)
     interpreter(data, dataType)
 
-#################
+
+####################
+# Création QR Code #
+####################
 
 
 def to_hamming(string):
@@ -264,16 +269,17 @@ def del_fen_QR():
 
 def creer_QR(save):
     '''Crée un QR code à partir du message, du type de données et du type de filtre choisis'''
-    global L_image, img, message, filtre, dataType
+    global L_image, L_info, img, message, filtre, dataType
     dType = dataType.get()
     f = filtre.get()
-    data = list(message.get())
+    data = list(message.get()[:16])
     data = [bin(ord(d))[2:] for d in data]
     data = ["0" * (8 - len(d)) + d if len(d) != 8 else d for d in data]
     data = [d[::-1] for d in data]
     data = [to_hamming(d[:4]) + to_hamming(d[4:]) for d in data]
 
     n = len(data)
+    nb_bloc = len(message.get()[:16])
     m = [[1] * 14 for _ in range(16)]
 
     for i in range(1, 2 * ((n + 1) // 2) + 1, 2):
@@ -294,6 +300,13 @@ def creer_QR(save):
     for i in range(1, n % 2 + n + 1):
         for j in range(1, 15):
             mat[-i][-j] = m[-i][-j]
+
+    nb_bloc_bin = bin(nb_bloc)[2:]
+    nb_bloc_bin = "0" * (5 - len(nb_bloc_bin)) + nb_bloc_bin
+
+    for i, e in enumerate(nb_bloc_bin[::-1]):
+        mat[16 - i][0] = int(e)
+
     mat[22][8] = 0 if f in [0, 1] else 1
     mat[23][8] = 0 if f in [0, 2] else 1
     mat[24][8] = dType
@@ -302,10 +315,19 @@ def creer_QR(save):
     toLoad = Image.new("1", (25, 25))
     toLoad.putdata(mat)
     if save:
-        toLoad.save("test1.png")
+        filename = fd.asksaveasfilename(
+            initialdir=os.getcwd() + "/Save/",
+            title="Enregistrer le QR Code",
+            filetypes=(("fichier PNG", "*.png"),),
+            defaultextension=".png"
+        )
+        if filename is not None:
+            toLoad.save(filename)
     toLoad = toLoad.resize((300, 300))
     img = ImageTk.PhotoImage(toLoad)
     L_image['image'] = img
+    dType = "ascii" if dType else "numérique"
+    L_info['text'] += f"\nType:\t\t{dType}\nMessage:\t\t{message.get()}"
 
 
 def fen_creer_QR():
@@ -333,7 +355,7 @@ def fen_creer_QR():
     R_ligneH = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=filtre, text="Lignes Horzontales", value=2)
     R_ligneV = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=filtre, text="Lignes Verticales", value=3)
 
-    L_message = tk.Label(fen_QR, text="Meesage: ")
+    L_message = tk.Label(fen_QR, text="Message: ")
     E_message = tk.Entry(fen_QR, textvariable=message)
 
     B_apercu = tk.Button(fen_QR, text="Aperçu du QR Code", command=lambda: creer_QR(False))
@@ -358,7 +380,6 @@ def fen_creer_QR():
     L_image.grid(row=4, column=0, columnspan=4)
 
     fen_QR.mainloop()
-#################
 
 
 def main():
