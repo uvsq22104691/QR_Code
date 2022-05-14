@@ -221,7 +221,10 @@ def applique_filtre(data, filtre):
 
 
 def ouvrir_QR():
-    '''Ouvre une fenêtre pour choisir un QR code à lire, l'affiche, l'interprète et affiche les informations (type de données, type de filtre, message)'''
+    '''Ouvre une fenêtre pour choisir un QR code à lire, l'affiche,
+        l'interprète et affiche les informations
+        (type de données, type de filtre, message)
+    '''
     f = fd.askopenfile(
         initialdir=os.getcwd() + "/Exemples/",
         title="charger un QR Code",
@@ -268,7 +271,9 @@ def del_fen_QR():
 
 
 def creer_QR(save):
-    '''Crée un QR code à partir du message, du type de données et du type de filtre choisis'''
+    '''Crée un QR code à partir du message, du type de données et du type de
+    filtre choisis
+    '''
     global L_image, L_info, img, message, filtre, dataType
     dType = dataType.get()
     f = filtre.get()
