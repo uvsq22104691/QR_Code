@@ -1,9 +1,9 @@
 # INFORMATION GROUPE
 GROUPE MI TD 03
 
-- [@Mathis ALLOUCHE](https://www.github.com/uvsq22104691)
-- [@Basile ](https://www.github.com/uvsq221)
 https://github.com/uvsq22104691/QR_Code
+- [@Mathis ALLOUCHE](https://www.github.com/uvsq22104691)
+- [@Basile LAURIOLA](https://www.github.com/uvsq22107694)
 
 # Projet QR Code
 ## Fonctionalités
