@@ -6,18 +6,20 @@ import os
 
 # Fonction
 def nbrLig(mat):
-    '''Retourne le nombre de ligne dans la matrice'''
+    ''' Retourne le nombre de ligne dans la matrice'''
     return len(mat)
 
 
 def nbrCol(mat):
-    '''Retourne le nombre de colonne dans la matrice'''
+    ''' Retourne le nombre de colonne dans la matrice'''
     return len(mat[0])
 
 
 def saving(matPix, filename):
     ''' sauvegarde l'image contenue dans matpix dans le fichier filename
-        utiliser une extension png pour que la fonction fonctionne sans perte d'information'''
+        utiliser une extension png pour que la fonction fonctionne sans perte
+        d'information
+    '''
     toSave = Image.new(mode="1", size=(nbrCol(matPix), nbrLig(matPix)))
     for i in range(nbrLig(matPix)):
         for j in range(nbrCol(matPix)):
@@ -26,7 +28,9 @@ def saving(matPix, filename):
 
 
 def loading(filename):
-    '''Charge l'image contenue dans le fichier filename et renvoie une matrice de pixels (0, 1)'''
+    ''' Charge l'image contenue dans le fichier filename et renvoie une
+        matrice de pixels (0, 1)
+    '''
     global L_image, img
     toLoad = Image.open(filename)
 
@@ -43,7 +47,7 @@ def loading(filename):
 
 
 def coin_QC():
-    '''Retourne la matrice représentant les coins de la matrice du QR Code'''
+    ''' sRetourne la matrice représentant les coins de la matrice du QR Code'''
     mat = [[0] * 7 for _ in range(7)]
 
     for i in range(7):
@@ -54,17 +58,35 @@ def coin_QC():
 
 
 def rotation(sens, mat):
-    """ Retourne la matrice tournée dans le sens (0: horaire, 1: anti-horaire, 2: 180°)"""
+    ''' Retourne la matrice tournée dans le sens
+        (
+            0: horaire,
+            1: anti-horaire,
+            2: 180°
+        )
+    '''
     if sens == 0:
-        return [[mat[-(i + 1)][j] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
+        return [
+            [
+                mat[-(i + 1)][j] for i in range(nbrLig(mat))
+            ] for j in range(nbrCol(mat))
+        ]
     elif sens == 1:
-        return [[mat[i][-(j + 1)] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
+        return [
+            [
+                mat[i][-(j + 1)] for i in range(nbrLig(mat))
+            ] for j in range(nbrCol(mat))
+        ]
 
-    return [[mat[-(i + 1)][-(j + 1)] for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
+    return [
+        [
+            mat[-(i + 1)][-(j + 1)] for i in range(nbrLig(mat))
+        ] for j in range(nbrCol(mat))
+    ]
 
 
 def verif_sens_QC(mat):
-    '''Retourne la matrice représentant le QR Code dans le bon sens'''
+    ''' Retourne la matrice représentant le QR Code dans le bon sens'''
     coin = coin_QC()
     for i in range(7):
         for j in range(7):
@@ -81,7 +103,9 @@ def verif_sens_QC(mat):
 
 
 def verif_ligne(mat):
-    '''Vérifie que les lignes horizontales et verticales reliant les coins du QR Code sont bien présentes'''
+    ''' Vérifie que les lignes horizontales et verticales reliant les coins du
+        QR Code sont bien présentes
+    '''
     verif = True
     for i in range(11):
         if i % 2 == 0:
@@ -99,7 +123,9 @@ def verif_ligne(mat):
 
 
 def correction_hamming(liste):
-    '''Applique la correction de Hamming sur la liste de bits et retourne la liste des bits de message corrigée'''
+    ''' Applique la correction de Hamming sur la liste de bits et retourne la
+        liste des bits de message corrigée
+    '''
     m1, m2, m3, m4, c1, c2, c3 = liste
     d_err = {
         1: 4,
@@ -121,17 +147,17 @@ def correction_hamming(liste):
 
 
 def extraire_donnee(mat):
-    '''Retourne la matrice des bits qui code les données'''
+    ''' Retourne la matrice des bits qui code les données'''
     return [ligne[-14:] for ligne in mat[-16:]]
 
 
 def lire_nb_nbloc(mat):
-    '''Retourne le nombre de blocs de données dans le QR Code'''
+    ''' Retourne le nombre de blocs de données dans le QR Code'''
     return int("".join([str(mat[i][0]) for i in range(13, 18)]), 2)
 
 
 def lire_donnee(mat, nbBloc=16):
-    '''retourne la liste de liste des blocs de données de 14 bits'''
+    ''' Retourne la liste de liste des blocs de données de 14 bits'''
     liste = []
     for i in range(0, nbBloc, 2):
         m = mat[::-1][i:i + 2][::-1]
@@ -150,28 +176,38 @@ def lire_donnee(mat, nbBloc=16):
 
 
 def lire_type_donnee(mat):
-    '''Retourne le type de données'''
+    ''' Retourne le type de données'''
     type = mat[24][8]
     return type
 
 
 def interpreter_ascii(data):
-    '''Affiche le message interprété en ASCII'''
+    ''' Affiche le message interprété en ASCII'''
     global L_info
     s = ""
     for bloc in [liste for liste in data]:
-        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))
+        tmp = ''.join(
+            map(
+                str,
+                correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])
+            )
+        )
         tmp = int(tmp, 2)
         s += chr(tmp)
     L_info['text'] = L_info['text'] + f"\nMessage:\t\t{s}"
 
 
 def interpreter_num(data):
-    '''Affiche le message interprété en hexadécimal'''
+    ''' Affiche le message interprété en hexadécimal'''
     global L_info
     s = ""
     for bloc in [liste for liste in data]:
-        tmp = ''.join(map(str, correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])))
+        tmp = ''.join(
+            map(
+                str,
+                correction_hamming(bloc[:7]) + correction_hamming(bloc[7:])
+            )
+        )
         s += hex(int(tmp, 2))[2:].upper() + " "
     s = s[:-1]
     L_info['text'] = L_info['text'] + f"\nMessage:\t\t{s}"
@@ -190,7 +226,7 @@ def interpreter(data, dataType):
 
 def lire_type_filtre(mat):
     '''Retourne le type de filtre'''
-    filtre = ''.join([str(mat[22][8]), str(mat[23][8])])
+    filtre = str(mat[22][8]) + str(mat[23][8])
     return int(filtre, 2)
 
 
@@ -255,7 +291,9 @@ def ouvrir_QR():
 
 
 def to_hamming(string):
-    '''Retourne la liste des bits de la chaîne de caractères en utilisant le codage hamming'''
+    ''' Retourne la liste des bits de la chaîne de caractères en utilisant le
+        codage hamming
+    '''
     m1, m2, m3, m4 = map(int, list(string))
     string += f"{(m1 + m2 + m4) % 2}"
     string += f"{(m1 + m3 + m4) % 2}"
@@ -264,15 +302,15 @@ def to_hamming(string):
 
 
 def del_fen_QR():
-    '''Supprime la fenêtre de l'interface graphique'''
+    ''' Supprime la fenêtre de l'interface graphique'''
     global fen_QR
     fen_QR.destroy()
     del fen_QR
 
 
 def creer_QR(save):
-    '''Crée un QR code à partir du message, du type de données et du type de
-    filtre choisis
+    ''' Crée un QR code à partir du message, du type de données et du type de
+        filtre choisis
     '''
     global L_image, L_info, img, message, filtre, dataType
     dType = dataType.get()
@@ -336,7 +374,7 @@ def creer_QR(save):
 
 
 def fen_creer_QR():
-    '''Crée une fenêtre pour créer un QR code'''
+    ''' Crée une fenêtre pour créer un QR code'''
     global root, fen_QR, message, filtre, dataType
     if "fen_QR" in globals():
         fen_QR.focus_force()
@@ -352,19 +390,68 @@ def fen_creer_QR():
     filtre = tk.IntVar(fen_QR)
     message = tk.StringVar(fen_QR)
 
-    R_ascii = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=dataType, text="ASCII", value=1)
-    R_num = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=dataType, text="Numérique", value=0)
+    R_ascii = tk.Radiobutton(
+        fen_QR,
+        font=("Ebrima", 12),
+        variable=dataType,
+        text="ASCII",
+        value=1
+    )
 
-    R_pas_filtre = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=filtre, text="Pas de filtre", value=0)
-    R_damier = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=filtre, text="Filtre damier", value=1)
-    R_ligneH = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=filtre, text="Lignes Horzontales", value=2)
-    R_ligneV = tk.Radiobutton(fen_QR, font=("Ebrima", 12), variable=filtre, text="Lignes Verticales", value=3)
+    R_num = tk.Radiobutton(
+        fen_QR,
+        font=("Ebrima", 12),
+        variable=dataType,
+        text="Numérique",
+        value=0
+    )
+
+    R_pas_filtre = tk.Radiobutton(
+        fen_QR,
+        font=("Ebrima", 12),
+        variable=filtre,
+        text="Pas de filtre",
+        value=0
+    )
+
+    R_damier = tk.Radiobutton(
+        fen_QR,
+        font=("Ebrima", 12),
+        variable=filtre,
+        text="Filtre damier",
+        value=1
+    )
+
+    R_ligneH = tk.Radiobutton(
+        fen_QR,
+        font=("Ebrima", 12),
+        variable=filtre,
+        text="Lignes Horzontales",
+        value=2
+    )
+
+    R_ligneV = tk.Radiobutton(
+        fen_QR,
+        font=("Ebrima", 12),
+        variable=filtre,
+        text="Lignes Verticales",
+        value=3
+    )
 
     L_message = tk.Label(fen_QR, text="Message: ")
     E_message = tk.Entry(fen_QR, textvariable=message)
 
-    B_apercu = tk.Button(fen_QR, text="Aperçu du QR Code", command=lambda: creer_QR(False))
-    B_creer = tk.Button(fen_QR, text="Créer le QR Code", command=lambda: creer_QR(True))
+    B_apercu = tk.Button(
+        fen_QR,
+        text="Aperçu du QR Code",
+        command=lambda: creer_QR(False)
+    )
+
+    B_creer = tk.Button(
+        fen_QR,
+        text="Créer le QR Code",
+        command=lambda: creer_QR(True)
+    )
 
     L_image = tk.Label(fen_QR)
 
@@ -388,7 +475,7 @@ def fen_creer_QR():
 
 
 def main():
-    '''Fonction principale, crée la fenêtre principale'''
+    ''' Fonction principale, crée la fenêtre principale'''
     global root, L_image, L_info
     root = tk.Tk()
     root.title("QR Code")
