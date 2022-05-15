@@ -146,20 +146,9 @@ def correction_hamming(liste):
     return liste[:4]
 
 
-<<<<<<< HEAD
-# variables
-matrice = loading("Exemples/qr_code_ssfiltre_ascii.png")
-# matrice = rotation(2, matrice)
-# print(*matrice, sep='\n', end="\n\n")
-# print(verif_ligne(matrice))
-matrice = verif_sens_QC(matrice)
-print(*matrice, sep='\n')
-# print(verif_ligne(matrice))
-=======
 def extraire_donnee(mat):
     ''' Retourne la matrice des bits qui code les données'''
     return [ligne[-14:] for ligne in mat[-16:]]
->>>>>>> 832f8c7572deb66748221a052fc5c3e0f8a3c994
 
 
 def lire_nb_nbloc(mat):
